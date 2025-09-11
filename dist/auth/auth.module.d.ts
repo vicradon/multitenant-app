@@ -1,2 +1,2 @@
-export declare class AuthModule {
+export default class AuthModule {
 }
