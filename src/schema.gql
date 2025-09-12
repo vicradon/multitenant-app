@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input CreateMedicalRecordInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 input CreateUserInput {
   displayName: String!
   email: String!
@@ -29,13 +34,26 @@ type LoginOutput {
   userName: String!
 }
 
+type MedicalRecord {
+  createdAt: DateTime!
+  diagnosis: String!
+  doctorName: String!
+  id: ID!
+  patientName: String!
+  updatedAt: DateTime!
+}
+
 type Mutation {
+  createMedicalRecord(createMedicalRecordInput: CreateMedicalRecordInput!): MedicalRecord!
   createUser(createUserInput: CreateUserInput!): User!
   login(loginInput: LoginInput!): LoginOutput!
   register(registerInput: RegisterInput!): LoginOutput!
+  removeMedicalRecord(id: Int!): MedicalRecord!
+  updateMedicalRecord(updateMedicalRecordInput: UpdateMedicalRecordInput!): MedicalRecord!
 }
 
 type Query {
+  medicalRecord(id: Int!): MedicalRecord!
   sayAuth: String!
 }
 
@@ -44,6 +62,20 @@ input RegisterInput {
   email: String!
   name: String
   password: String!
+}
+
+type Tenant {
+  databaseName: String!
+  id: ID!
+
+  """The name of the hospital"""
+  name: String!
+}
+
+input UpdateMedicalRecordInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
 }
 
 type User {
@@ -57,6 +89,7 @@ type User {
   resetPasswordToken: String
   resetPasswordTokenExpiry: DateTime
   roles: [UserRoles!]
+  tenant: Tenant
   updatedAt: DateTime!
 }
 

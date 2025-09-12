@@ -1,7 +1,8 @@
 import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
-import CustomBaseEntity from 'src/infra/base-classes/base.entity.shared';
+import CustomBaseEntity from 'src/infra/base-classes/base.entity';
+import Tenant from 'src/tenant/entities/tenant.entity';
 
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 export enum UserRoleEnum {
   SUPER_ADMIN = 'SUPER_ADMIN',
@@ -47,4 +48,13 @@ export default class User extends CustomBaseEntity {
   @Column({ default: null })
   @Field({ nullable: true })
   forgetPasswordToken: string;
+
+  @Column()
+  tenantId: string;
+
+  // many users -> one tenant
+  @Field(() => Tenant, { nullable: true })
+  @JoinColumn({ name: 'tenantId' })
+  @ManyToOne(() => Tenant, { eager: true, nullable: false })
+  tenant: Tenant;
 }

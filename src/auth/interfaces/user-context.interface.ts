@@ -15,6 +15,8 @@ export default interface IUserContext {
 
   isSuperAdmin?: boolean;
 
+  tenantId: string;
+
   /** The user's roles */
   roles?: UserRoleEnum[];
 }

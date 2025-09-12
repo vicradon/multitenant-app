@@ -17,12 +17,13 @@ export default class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: IJwtPayload): Promise<IUserContext> {
-    const { sub, displayName, email, roles } = payload;
+    const { sub, displayName, email, roles, tenantId } = payload;
 
     return {
       id: sub,
       sub,
       displayName,
+      tenantId,
       email,
       roles,
     };

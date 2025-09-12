@@ -11,44 +11,64 @@ import { AppService } from './app.service';
 import AuthModule from './auth/auth.module';
 import { MedicalRecordModule } from './medical_record/medical_record.module';
 import UserModule from './user/user.module';
+import User from './user/entities/user.entity';
+import Tenant from './tenant/entities/tenant.entity';
+import { filterEntities } from './utils/glob';
+import MedicalRecord from './medical_record/entities/medical_record.entity';
+import { DatabaseModule } from './database/database.module';
+import { TenantModule } from './tenant/tenant.module';
+import { RedisModule } from '@nestjs-modules/ioredis';
+
+const sharedEntities = filterEntities(['user.entity', 'base.entity']);
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [".env"],
+      envFilePath: ['.env'],
     }),
-    // TypeOrmModule.forRoot({
-    //   type: 'postgres',
-    //   url: "postgresql://hospital_a:hospital_a@localhost:5432/hospital_a",
-    //   entities: ['./dist/**/*entity.{ts,js}'],
-    //   synchronize: true,
-    // }),
-
+    RedisModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'single',
+        url: configService.get("REDIS_URL"),
+      }),
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      // name: 'hospitalA',
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        url: configService.get('DB_URL_IDENTITY'),
+        entities: [Tenant, User],
+        synchronize: true,
+      }),
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      name: 'hospitalA',
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get('DB_URL_HOSPITAL_A'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        entities: [MedicalRecord],
         synchronize: true,
+        logging: false,
       }),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      // name: 'hospitalB',
+      name: 'hospitalB',
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get('DB_URL_HOSPITAL_B'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        entities: [MedicalRecord],
         synchronize: true,
+        logging: false,
       }),
     }),
-
-
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -66,11 +86,13 @@ import UserModule from './user/user.module';
       },
     }),
 
+    DatabaseModule,
     AuthModule,
     MedicalRecordModule,
-    UserModule
+    UserModule,
+    TenantModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

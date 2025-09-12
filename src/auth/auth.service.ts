@@ -57,6 +57,7 @@ export default class AuthService {
     const payload: IJwtPayload = {
       sub: user.id,
       email: user.email,
+      tenantId: user.tenantId,
     };
 
     if (extendPayload) {
@@ -71,6 +72,7 @@ export default class AuthService {
       message: 'Logged in successfully',
       userName: user.displayName,
       email: user.email,
+      
       accessToken: this.jwtService.sign(payload, options),
     };
   }
