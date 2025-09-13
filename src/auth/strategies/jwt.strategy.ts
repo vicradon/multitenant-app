@@ -5,6 +5,7 @@ import { Strategy, ExtractJwt } from 'passport-jwt';
 
 import { IJwtPayload } from '../interfaces/jwt-payload.interface';
 import IUserContext from '../interfaces/user-context.interface';
+import { requestContext } from 'src/shared/request-context';
 
 @Injectable()
 export default class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -18,6 +19,8 @@ export default class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
 
   async validate(payload: IJwtPayload): Promise<IUserContext> {
     const { sub, displayName, email, roles, tenantId } = payload;
+
+    requestContext.enterWith({ tenantId });
 
     return {
       id: sub,

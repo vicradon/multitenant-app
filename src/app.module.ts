@@ -50,7 +50,6 @@ import { getHospitalADataSource, getHospitalBDataSource, getIdentityDataSource }
       imports: [ConfigModule],
       inject: [ConfigService],
       driver: ApolloDriver,
-      // @ts-ignore
       useFactory: async () => {
         return {
           csrfPrevention: false,
@@ -63,7 +62,7 @@ import { getHospitalADataSource, getHospitalBDataSource, getIdentityDataSource }
       },
     }),
     AuthModule,
-    // MedicalRecordModule,
+    MedicalRecordModule,
     UserModule,
     TenantModule,
   ],

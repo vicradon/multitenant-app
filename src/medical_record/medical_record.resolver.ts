@@ -3,8 +3,7 @@ import { MedicalRecordService } from './medical_record.service';
 import MedicalRecord from './entities/medical_record.entity';
 import { CreateMedicalRecordInput } from './dto/create-medical_record.input';
 import { UpdateMedicalRecordInput } from './dto/update-medical_record.input';
-import CurrentUser from 'src/auth/decorators/current-user.decorator';
-import IUserContext from 'src/auth/interfaces/user-context.interface';
+
 
 @Resolver(() => MedicalRecord)
 export class MedicalRecordResolver {
@@ -14,18 +13,17 @@ export class MedicalRecordResolver {
   createMedicalRecord(
     @Args('createMedicalRecordInput')
     createMedicalRecordInput: CreateMedicalRecordInput,
-    @CurrentUser() userContext: IUserContext,
   ) {
-    return this.medicalRecordService.create(createMedicalRecordInput, userContext);
+    return this.medicalRecordService.create(createMedicalRecordInput);
   }
 
   @Query(() => [MedicalRecord], { name: 'medicalRecords' })
-  findAll(@CurrentUser() userContext: IUserContext) {
-    return this.medicalRecordService.findAll(userContext);
+  findAll() {
+    return this.medicalRecordService.findAll();
   }
 
   @Query(() => MedicalRecord, { name: 'medicalRecord' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
+  findOne(@Args('id', { type: () => Int }) id: string) {
     return this.medicalRecordService.findOne(id);
   }
 
@@ -41,7 +39,7 @@ export class MedicalRecordResolver {
   }
 
   @Mutation(() => MedicalRecord)
-  removeMedicalRecord(@Args('id', { type: () => Int }) id: number) {
+  removeMedicalRecord(@Args('id', { type: () => String }) id: string) {
     return this.medicalRecordService.remove(id);
   }
 }

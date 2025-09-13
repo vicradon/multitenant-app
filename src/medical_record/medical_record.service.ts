@@ -2,41 +2,51 @@ import { Injectable } from '@nestjs/common';
 import { CreateMedicalRecordInput } from './dto/create-medical_record.input';
 import { UpdateMedicalRecordInput } from './dto/update-medical_record.input';
 import MedicalRecord from './entities/medical_record.entity';
-import IUserContext from 'src/auth/interfaces/user-context.interface';
+import { TenantConnectionService } from 'src/shared/repository';
 
 @Injectable()
 export class MedicalRecordService {
-  // @ts-ignore
-  constructor(private repoFactory: RepositoryFactory) {}
+  constructor(private readonly tenantConnection: TenantConnectionService) {}
 
-  async create(
-    createMedicalRecordInput: CreateMedicalRecordInput,
-    userContext: IUserContext,
-  ) {
-    const record = new MedicalRecord();
+  async create(createMedicalRecordInput: CreateMedicalRecordInput) {
+    const repo = await this.tenantConnection.getRepository(MedicalRecord);
 
-    record.diagnosis = createMedicalRecordInput.diagnosis;
-    record.doctorName = createMedicalRecordInput.doctorName;
-    record.patientName = createMedicalRecordInput.patientName;
+    const record = repo.create({
+      diagnosis: createMedicalRecordInput.diagnosis,
+      doctorName: createMedicalRecordInput.doctorName,
+      patientName: createMedicalRecordInput.patientName,
+    });
 
-    await this.repoFactory.save(MedicalRecord, record, userContext);
-
+    await repo.save(record);
     return record;
   }
 
-  async findAll(userContext: IUserContext) {
-    return await this.repoFactory.find(MedicalRecord, userContext);
+  async findAll() {
+    const repo = await this.tenantConnection.getRepository(MedicalRecord);
+    return repo.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} medicalRecord`;
+  async findOne(id: string) {
+    const repo = await this.tenantConnection.getRepository(MedicalRecord);
+    return repo.findOne({ where: { id } });
   }
 
-  update(id: number, updateMedicalRecordInput: UpdateMedicalRecordInput) {
-    return `This action updates a #${id} medicalRecord`;
+  async update(id: string, updateInput: UpdateMedicalRecordInput) {
+    const repo = await this.tenantConnection.getRepository(MedicalRecord);
+    const record = await repo.findOne({ where: { id } });
+    if (!record) throw new Error('Record not found');
+
+    Object.assign(record, updateInput);
+    await repo.save(record);
+    return record;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} medicalRecord`;
+  async remove(id: string) {
+    const repo = await this.tenantConnection.getRepository(MedicalRecord);
+    const record = await repo.findOne({ where: { id } });
+    if (!record) throw new Error('Record not found');
+
+    await repo.remove(record);
+    return  'Record removed';
   }
 }

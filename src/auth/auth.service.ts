@@ -48,13 +48,16 @@ export default class AuthService {
       throw new NotFoundException('404');
     }
 
-    const user = await this.userService.create({
+    const tenant = await this.getTenantRecordByEmail(email);
+    const creationObject = {
       displayName: name,
       email,
       password,
       roles: [UserRoleEnum.STAFF_USER],
       isSuperAdmin: true,
-    });
+    };
+
+    const user = await this.userService.create(creationObject, tenant);
 
     return this.generateAuthToken(user);
   }
@@ -83,7 +86,7 @@ export default class AuthService {
     };
   }
 
-  async validateUser(email: string, password: string): Promise<User> {
+  async getTenantRecordByEmail(email: string): Promise<Tenant> {
     const identityRepo = this.tenantConnection.getIdentityRepository();
     if (!email) throw new BadRequestException('No email supplied');
     const parts = email.split('@');
@@ -96,10 +99,13 @@ export default class AuthService {
     if (!tenantRecord)
       throw new UnauthorizedException('Record not found on db');
 
-    const user = await this.userService.findPasswordByEmail(
-      email,
-      tenantRecord,
-    );
+    return tenantRecord;
+  }
+
+  async validateUser(email: string, password: string): Promise<User> {
+    const tenantRecord = await this.getTenantRecordByEmail(email);
+
+    const user = await this.userService.findByEmail(email, tenantRecord);
 
     if (!user) {
       throw new UnauthorizedException('User Not found');

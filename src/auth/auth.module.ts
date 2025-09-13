@@ -22,7 +22,6 @@ import { TenantConnectionService } from 'src/shared/repository';
         secret: configService.get('JWT_SECRET')
       }),
     }),
-    // TypeOrmModule.forFeature([Tenant])
   ],
   providers: [
     AuthService,
