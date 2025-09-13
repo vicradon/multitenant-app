@@ -19,9 +19,9 @@ export class MedicalRecordResolver {
     return this.medicalRecordService.create(createMedicalRecordInput, userContext);
   }
 
-  @Query(() => [MedicalRecord], { name: 'medicalRecord' })
-  findAll() {
-    return this.medicalRecordService.findAll();
+  @Query(() => [MedicalRecord], { name: 'medicalRecords' })
+  findAll(@CurrentUser() userContext: IUserContext) {
+    return this.medicalRecordService.findAll(userContext);
   }
 
   @Query(() => MedicalRecord, { name: 'medicalRecord' })

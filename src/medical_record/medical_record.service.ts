@@ -9,20 +9,23 @@ import IUserContext from 'src/auth/interfaces/user-context.interface';
 export class MedicalRecordService {
   constructor(private repoFactory: RepositoryFactory) {}
 
-  async create(createMedicalRecordInput: CreateMedicalRecordInput, userContext: IUserContext) {
+  async create(
+    createMedicalRecordInput: CreateMedicalRecordInput,
+    userContext: IUserContext,
+  ) {
     const record = new MedicalRecord();
 
-    record.diagnosis = 'Fever';
-    record.doctorName = 'Dr Hans';
-    record.patientName = 'Mr Boi';
+    record.diagnosis = createMedicalRecordInput.diagnosis;
+    record.doctorName = createMedicalRecordInput.doctorName;
+    record.patientName = createMedicalRecordInput.patientName;
 
     await this.repoFactory.save(MedicalRecord, record, userContext);
 
-    return record
+    return record;
   }
 
-  findAll() {
-    return `This action returns all medicalRecord`;
+  async findAll(userContext: IUserContext) {
+    return await this.repoFactory.find(MedicalRecord, userContext);
   }
 
   findOne(id: number) {

@@ -3,8 +3,9 @@
 # ------------------------------------------------------
 
 input CreateMedicalRecordInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  diagnosis: String!
+  doctorName: String!
+  patientName: String!
 }
 
 input CreateUserInput {
@@ -54,6 +55,7 @@ type Mutation {
 
 type Query {
   medicalRecord(id: Int!): MedicalRecord!
+  medicalRecords: [MedicalRecord!]!
   sayAuth: String!
 }
 
@@ -73,9 +75,10 @@ type Tenant {
 }
 
 input UpdateMedicalRecordInput {
-  """Example field (placeholder)"""
-  exampleField: Int
+  diagnosis: String
+  doctorName: String
   id: Int!
+  patientName: String
 }
 
 type User {
