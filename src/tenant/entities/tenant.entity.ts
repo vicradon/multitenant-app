@@ -16,4 +16,8 @@ export default class Tenant {
   @Column()
   @Field()
   databaseName: string;
+
+  @Column()
+  @Field({description: "The domain of the org"})
+  domain: string;
 }

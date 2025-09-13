@@ -11,15 +11,9 @@ import { AppService } from './app.service';
 import AuthModule from './auth/auth.module';
 import { MedicalRecordModule } from './medical_record/medical_record.module';
 import UserModule from './user/user.module';
-import User from './user/entities/user.entity';
-import Tenant from './tenant/entities/tenant.entity';
-import { filterEntities } from './utils/glob';
-import MedicalRecord from './medical_record/entities/medical_record.entity';
-import { DatabaseModule } from './database/database.module';
 import { TenantModule } from './tenant/tenant.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
-
-const sharedEntities = filterEntities(['user.entity', 'base.entity']);
+import { getHospitalADataSource, getHospitalBDataSource, getIdentityDataSource } from './db/data-source';
 
 @Module({
   imports: [
@@ -38,36 +32,19 @@ const sharedEntities = filterEntities(['user.entity', 'base.entity']);
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        url: configService.get('DB_URL_IDENTITY'),
-        entities: [Tenant, User],
-        synchronize: true,
-      }),
+      useFactory: getIdentityDataSource,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       name: 'hospitalA',
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        url: configService.get('DB_URL_HOSPITAL_A'),
-        entities: [MedicalRecord],
-        synchronize: true,
-        logging: false,
-      }),
+      useFactory: getHospitalADataSource,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       name: 'hospitalB',
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        url: configService.get('DB_URL_HOSPITAL_B'),
-        entities: [MedicalRecord],
-        synchronize: true,
-        logging: false,
-      }),
+      useFactory: getHospitalBDataSource,
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       imports: [ConfigModule],
@@ -85,10 +62,8 @@ const sharedEntities = filterEntities(['user.entity', 'base.entity']);
         };
       },
     }),
-
-    DatabaseModule,
     AuthModule,
-    MedicalRecordModule,
+    // MedicalRecordModule,
     UserModule,
     TenantModule,
   ],

@@ -8,6 +8,9 @@ import UserModule from 'src/user/user.module';
 import AuthResolver from './auth.resolver';
 import JwtAuthStrategy from './strategies/jwt.strategy';
 import JwtAuthGqlGuard from './guards/jwt-auth-gql.guard';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import Tenant from 'src/tenant/entities/tenant.entity';
+import { TenantConnectionService } from 'src/shared/repository';
 
 @Module({
   imports: [
@@ -19,6 +22,7 @@ import JwtAuthGqlGuard from './guards/jwt-auth-gql.guard';
         secret: configService.get('JWT_SECRET')
       }),
     }),
+    // TypeOrmModule.forFeature([Tenant])
   ],
   providers: [
     AuthService,
@@ -28,6 +32,7 @@ import JwtAuthGqlGuard from './guards/jwt-auth-gql.guard';
       provide: APP_GUARD,
       useClass: JwtAuthGqlGuard,
     },
+    TenantConnectionService
   ],
   exports: [AuthService],
 })

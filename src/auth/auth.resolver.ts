@@ -21,9 +21,9 @@ export default class AuthResolver {
         return this.authService.login(loginInput);
     }
 
-    @Public()
-    @Mutation(() => LoginOutput, { name: 'register' })
-    async register(@Args('registerInput') registerInput: RegisterInput) {
-        return this.authService.register(registerInput);
-    }
+    // @Public()
+    // @Mutation(() => LoginOutput, { name: 'register' })
+    // async register(@Args('registerInput') registerInput: RegisterInput) {
+    //     return this.authService.register(registerInput);
+    // }
 }

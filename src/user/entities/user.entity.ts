@@ -53,8 +53,8 @@ export default class User extends CustomBaseEntity {
   tenantId: string;
 
   // many users -> one tenant
-  @Field(() => Tenant, { nullable: true })
-  @JoinColumn({ name: 'tenantId' })
-  @ManyToOne(() => Tenant, { eager: true, nullable: false })
-  tenant: Tenant;
+  // @Field(() => Tenant, { nullable: true })
+  // @JoinColumn({ name: 'tenantId' })
+  // @ManyToOne(() => Tenant, { eager: true, nullable: false })
+  // tenant: Tenant;
 }

@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { CreateMedicalRecordInput } from './dto/create-medical_record.input';
 import { UpdateMedicalRecordInput } from './dto/update-medical_record.input';
 import MedicalRecord from './entities/medical_record.entity';
-import { RepositoryFactory } from 'src/shared/repository';
 import IUserContext from 'src/auth/interfaces/user-context.interface';
 
 @Injectable()
 export class MedicalRecordService {
+  // @ts-ignore
   constructor(private repoFactory: RepositoryFactory) {}
 
   async create(

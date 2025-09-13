@@ -1,81 +1,37 @@
-import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
+import { DataSource, Repository, EntityTarget, ObjectLiteral } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, Repository, EntityTarget, FindManyOptions, DeepPartial, ObjectLiteral } from 'typeorm';
-import IUserContext from "src/auth/interfaces/user-context.interface";
-import { TenantService } from "src/tenant/tenant.service";
+import Tenant from 'src/tenant/entities/tenant.entity';
 
-type DatabaseName = 'hospitalA' | 'hospitalB'; 
-
+// @Injectable({ scope: Scope.REQUEST })
 @Injectable()
-export class RepositoryFactory {
+export class TenantConnectionService {
+  private readonly connectionMap: Record<string, DataSource>;
+
   constructor(
-    @InjectDataSource('hospitalA') private hospitalA: DataSource,
-    @InjectDataSource('hospitalB') private hospitalB: DataSource,
-    private tenantLookup: TenantService,
-  ) {}
-
-  private getDataSource(dbName: string): DataSource {
-    switch(dbName) {
-      case 'hospital_a': return this.hospitalA;
-      case 'hospital_b': return this.hospitalB;
-      default:
-        throw new BadRequestException(`Database connection '${dbName}' not found`);
-    }
+    @InjectDataSource() private readonly identityDataSource: DataSource,
+    @InjectDataSource('hospitalA')
+    private readonly hospitalAConnection: DataSource,
+    @InjectDataSource('hospitalB')
+    private readonly hospitalBConnection: DataSource,
+  ) {
+    this.connectionMap = {
+      hospital_a: hospitalAConnection,
+      hospital_b: hospitalBConnection,
+    }; 
   }
 
-  async getRepository<T extends ObjectLiteral>(
-    entity: EntityTarget<T>,
-    userContext: IUserContext
-  ): Promise<Repository<T>> {
-    const tenantDb = await this.tenantLookup.getTenantDatabase(userContext.tenantId);
-    const dataSource = this.getDataSource(tenantDb);
-    return dataSource.getRepository(entity);
+  getRepository<Entity extends ObjectLiteral>(
+    entity: EntityTarget<Entity>,
+    tenant: Tenant,
+  ): Repository<Entity> {
+    const connection = this.connectionMap[tenant.databaseName];
+    if (!connection)
+      throw new Error(`No connection found for tenant ${tenant.databaseName}`);
+    return connection.getRepository(entity);
   }
 
-  async save<T extends ObjectLiteral>(
-    entity: EntityTarget<T>, 
-    data: DeepPartial<T>,
-    userContext: IUserContext
-  ): Promise<T> {
-    const repo = await this.getRepository<T>(entity, userContext);
-    return repo.save(data);
-  }
-
-  async find<T extends ObjectLiteral>(
-    entity: EntityTarget<T>, 
-    userContext: IUserContext,
-    options?: FindManyOptions<T>
-  ): Promise<T[]> {
-    const repo = await this.getRepository<T>(entity, userContext);
-    return repo.find(options);
-  }
-
-  async findOne<T extends ObjectLiteral>(
-    entity: EntityTarget<T>, 
-    userContext: IUserContext,
-    options: FindManyOptions<T>
-  ): Promise<T | null> {
-    const repo = await this.getRepository<T>(entity, userContext);
-    return repo.findOne(options as any);
-  }
-
-  async update<T extends ObjectLiteral>(
-    entity: EntityTarget<T>, 
-    userContext: IUserContext,
-    criteria: any,
-    partialEntity: DeepPartial<T>
-  ): Promise<any> {
-    const repo = await this.getRepository<T>(entity, userContext);
-    return repo.update(criteria, partialEntity as QueryDeepPartialEntity<T>);
-  }
-
-  async delete<T extends ObjectLiteral>(
-    entity: EntityTarget<T>, 
-    userContext: IUserContext,
-    criteria: any
-  ): Promise<any> {
-    const repo = await this.getRepository<T>(entity, userContext);
-    return repo.delete(criteria);
+  getIdentityRepository(): Repository<Tenant> {
+    return this.identityDataSource.getRepository(Tenant);
   }
 }

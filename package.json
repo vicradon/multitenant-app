@@ -18,10 +18,13 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "seed:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm-extension/dist/cli.js seed:run -c ./src/data-source.ts",
+    "seed:revert": "ts-node -r tsconfig-paths/register ./node_modules/typeorm-extension/dist/cli.js seed:revert -c ./src/data-source.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.12.2",
+    "@faker-js/faker": "^10.0.0",
     "@nestjs-modules/ioredis": "^2.0.2",
     "@nestjs/apollo": "^13.1.0",
     "@nestjs/common": "^11.0.1",
@@ -41,7 +44,8 @@
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "typeorm": "^0.3.26"
+    "typeorm": "^0.3.26",
+    "typeorm-extension": "^3.7.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
