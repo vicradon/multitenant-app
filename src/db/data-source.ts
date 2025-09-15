@@ -17,7 +17,7 @@ export const getIdentityDataSource = (
   logging: false,
 });
 
-export const DynamicDataSource = (connectionString): DataSource => {
+export const DynamicDataSource = (connectionString: string): DataSource => {
   return new DataSource({
     type: 'postgres',
     url: connectionString,
