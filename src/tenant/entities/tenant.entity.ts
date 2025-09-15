@@ -13,9 +13,9 @@ export default class Tenant {
   @Field({ description: 'The name of the hospital' })
   name: string;
 
-  @Column()
+  @Column({})
   @Field()
-  databaseName: string;
+  databaseConnectionString: string;
 
   @Column()
   @Field({description: "The domain of the org"})

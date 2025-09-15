@@ -1,5 +1,5 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import CustomBaseEntity from 'src/infra/base-classes/base.entity';
+import CustomBaseEntity from '../../infra/base-classes/base.entity';
 import { Entity, Column } from 'typeorm';
 
 @Entity()

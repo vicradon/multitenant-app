@@ -13,7 +13,9 @@ import { MedicalRecordModule } from './medical_record/medical_record.module';
 import UserModule from './user/user.module';
 import { TenantModule } from './tenant/tenant.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
-import { getHospitalADataSource, getHospitalBDataSource, getIdentityDataSource } from './db/data-source';
+import { getIdentityDataSource } from './db/data-source';
+import DatabaseModule from './database/database.module';
+import type { Request, Response } from 'express';
 
 @Module({
   imports: [
@@ -26,7 +28,7 @@ import { getHospitalADataSource, getHospitalBDataSource, getIdentityDataSource }
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'single',
-        url: configService.get("REDIS_URL"),
+        url: configService.get('REDIS_URL'),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -34,18 +36,7 @@ import { getHospitalADataSource, getHospitalBDataSource, getIdentityDataSource }
       inject: [ConfigService],
       useFactory: getIdentityDataSource,
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      name: 'hospitalA',
-      useFactory: getHospitalADataSource,
-    }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      name: 'hospitalB',
-      useFactory: getHospitalBDataSource,
-    }),
+    AuthModule,
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -56,12 +47,15 @@ import { getHospitalADataSource, getHospitalBDataSource, getIdentityDataSource }
           playground: false,
           autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
           sortSchema: true,
+
           plugins: [ApolloServerPluginLandingPageLocalDefault()],
-          context: ({ req, res }) => ({ req, res }),
+          context: ({ req, res }: { req: Request; res: Response }) => {
+            return { req, res };
+          },
         };
       },
     }),
-    AuthModule,
+    DatabaseModule,
     MedicalRecordModule,
     UserModule,
     TenantModule,

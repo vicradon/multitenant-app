@@ -4,7 +4,6 @@ import MedicalRecord from './entities/medical_record.entity';
 import { CreateMedicalRecordInput } from './dto/create-medical_record.input';
 import { UpdateMedicalRecordInput } from './dto/update-medical_record.input';
 
-
 @Resolver(() => MedicalRecord)
 export class MedicalRecordResolver {
   constructor(private readonly medicalRecordService: MedicalRecordService) {}

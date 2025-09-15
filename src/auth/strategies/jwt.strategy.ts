@@ -5,7 +5,7 @@ import { Strategy, ExtractJwt } from 'passport-jwt';
 
 import { IJwtPayload } from '../interfaces/jwt-payload.interface';
 import IUserContext from '../interfaces/user-context.interface';
-import { requestContext } from 'src/shared/request-context';
+import { Request } from 'express';
 
 @Injectable()
 export default class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -14,13 +14,14 @@ export default class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: configService.getOrThrow<string>('JWT_SECRET'),
+      passReqToCallback: true,
     });
   }
 
-  async validate(payload: IJwtPayload): Promise<IUserContext> {
+  async validate(request: Request, payload: IJwtPayload): Promise<IUserContext> {
     const { sub, displayName, email, roles, tenantId } = payload;
 
-    requestContext.enterWith({ tenantId });
+    request['tenantId'] = payload.tenantId;
 
     return {
       id: sub,

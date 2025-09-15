@@ -1,8 +1,8 @@
 import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
-import CustomBaseEntity from 'src/infra/base-classes/base.entity';
-import Tenant from 'src/tenant/entities/tenant.entity';
+import CustomBaseEntity from '../../infra/base-classes/base.entity';
 
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+
+import { Column, Entity } from 'typeorm';
 
 export enum UserRoleEnum {
   SUPER_ADMIN = 'SUPER_ADMIN',

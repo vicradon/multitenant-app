@@ -8,13 +8,12 @@ import UserModule from 'src/user/user.module';
 import AuthResolver from './auth.resolver';
 import JwtAuthStrategy from './strategies/jwt.strategy';
 import JwtAuthGqlGuard from './guards/jwt-auth-gql.guard';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import Tenant from 'src/tenant/entities/tenant.entity';
-import { TenantConnectionService } from 'src/shared/repository';
+import DatabaseModule from 'src/database/database.module';
 
 @Module({
   imports: [
     UserModule,
+    DatabaseModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -31,7 +30,6 @@ import { TenantConnectionService } from 'src/shared/repository';
       provide: APP_GUARD,
       useClass: JwtAuthGqlGuard,
     },
-    TenantConnectionService
   ],
   exports: [AuthService],
 })

@@ -47,6 +47,7 @@ type Query {
   medicalRecord(id: Int!): MedicalRecord!
   medicalRecords: [MedicalRecord!]!
   sayAuth: String!
+  sayHi: String!
 }
 
 input UpdateMedicalRecordInput {

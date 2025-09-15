@@ -1,15 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateMedicalRecordInput } from './dto/create-medical_record.input';
 import { UpdateMedicalRecordInput } from './dto/update-medical_record.input';
 import MedicalRecord from './entities/medical_record.entity';
-import { TenantConnectionService } from 'src/shared/repository';
+import { AuthedDBConnectionService } from 'src/database/auth-repository';
 
 @Injectable()
 export class MedicalRecordService {
-  constructor(private readonly tenantConnection: TenantConnectionService) {}
+  constructor(private readonly authedDBConnection: AuthedDBConnectionService) {}
 
   async create(createMedicalRecordInput: CreateMedicalRecordInput) {
-    const repo = await this.tenantConnection.getRepository(MedicalRecord);
+    const repo = await this.authedDBConnection.getRepository(MedicalRecord);
+    if (!repo) throw new BadRequestException('Repository not initialized');
 
     const record = repo.create({
       diagnosis: createMedicalRecordInput.diagnosis,
@@ -22,17 +23,18 @@ export class MedicalRecordService {
   }
 
   async findAll() {
-    const repo = await this.tenantConnection.getRepository(MedicalRecord);
+    const repo = await this.authedDBConnection.getRepository(MedicalRecord);
     return repo.find();
   }
 
   async findOne(id: string) {
-    const repo = await this.tenantConnection.getRepository(MedicalRecord);
+    const repo = await this.authedDBConnection.getRepository(MedicalRecord);
     return repo.findOne({ where: { id } });
   }
 
   async update(id: string, updateInput: UpdateMedicalRecordInput) {
-    const repo = await this.tenantConnection.getRepository(MedicalRecord);
+    const repo = await this.authedDBConnection.getRepository(MedicalRecord);
+
     const record = await repo.findOne({ where: { id } });
     if (!record) throw new Error('Record not found');
 
@@ -42,11 +44,11 @@ export class MedicalRecordService {
   }
 
   async remove(id: string) {
-    const repo = await this.tenantConnection.getRepository(MedicalRecord);
+    const repo = await this.authedDBConnection.getRepository(MedicalRecord);
     const record = await repo.findOne({ where: { id } });
     if (!record) throw new Error('Record not found');
 
     await repo.remove(record);
-    return  'Record removed';
+    return 'Record removed';
   }
 }

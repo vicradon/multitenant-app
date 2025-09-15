@@ -19,8 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seed:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm-extension/dist/cli.js seed:run -c ./src/data-source.ts",
-    "seed:revert": "ts-node -r tsconfig-paths/register ./node_modules/typeorm-extension/dist/cli.js seed:revert -c ./src/data-source.ts"
+    "seed:all": "ts-node ./src/db/seedall.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.12.2",

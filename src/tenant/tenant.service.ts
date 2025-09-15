@@ -25,16 +25,16 @@ export class TenantService {
 
     const tenant = await this.tenantRepo.findOne({
       where: { id: tenantId },
-      select: ['id', 'databaseName']
+      select: ['id', 'domain']
     });
 
-    if (!tenant || !tenant.databaseName) {
+    if (!tenant || !tenant.domain) {
       throw new BadRequestException(`Invalid or inactive tenant ID: ${tenantId}`);
     }
 
-    await this.redis.setex(cacheKey, this.CACHE_TTL, tenant.databaseName);
+    await this.redis.setex(cacheKey, this.CACHE_TTL, tenant.domain);
 
-    return tenant.databaseName;
+    return tenant.domain;
   }
 
   // Cache invalidation when tenant config changes
@@ -47,14 +47,14 @@ export class TenantService {
   async preloadCache(tenantIds: string[]): Promise<void> {
     const tenants = await this.tenantRepo.find({
       where: { id: In(tenantIds) },
-      select: ['id', 'databaseName']
+      select: ['id', 'domain']
     });
 
     const pipeline = this.redis.pipeline();
     
     tenants.forEach(tenant => {
       const cacheKey = `${this.CACHE_PREFIX}${tenant.id}`;
-      pipeline.setex(cacheKey, this.CACHE_TTL, tenant.databaseName);
+      pipeline.setex(cacheKey, this.CACHE_TTL, tenant.domain);
     });
 
     await pipeline.exec();

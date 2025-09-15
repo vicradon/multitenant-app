@@ -8,17 +8,15 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { hash, compare } from 'bcryptjs';
+import { compare } from 'bcryptjs';
 
 import User, { UserRoleEnum } from '../user/entities/user.entity';
 import { IJwtPayload } from './interfaces/jwt-payload.interface';
 import UserService from 'src/user/user.service';
 import LoginInput from './dto/login.input';
 import RegisterInput from './dto/register.input';
-import { InjectRepository } from '@nestjs/typeorm';
 import Tenant from 'src/tenant/entities/tenant.entity';
-import { Repository } from 'typeorm';
-import { TenantConnectionService } from 'src/shared/repository';
+import { UnauthedDBConnectionService } from 'src/database/unauth-repository';
 
 @Injectable()
 export default class AuthService {
@@ -26,7 +24,7 @@ export default class AuthService {
     @Inject(forwardRef(() => UserService)) private userService: UserService,
     private configService: ConfigService,
     private jwtService: JwtService,
-    private readonly tenantConnection: TenantConnectionService,
+    private readonly tenantConnection: UnauthedDBConnectionService,
   ) {}
 
   async login(input: LoginInput) {
@@ -81,7 +79,6 @@ export default class AuthService {
       message: 'Logged in successfully',
       userName: user.displayName,
       email: user.email,
-
       accessToken: this.jwtService.sign(payload, options),
     };
   }
@@ -103,9 +100,7 @@ export default class AuthService {
   }
 
   async validateUser(email: string, password: string): Promise<User> {
-    const tenantRecord = await this.getTenantRecordByEmail(email);
-
-    const user = await this.userService.findByEmail(email, tenantRecord);
+    const user = await this.userService.findByEmail(email);
 
     if (!user) {
       throw new UnauthorizedException('User Not found');
