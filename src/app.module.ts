@@ -12,7 +12,6 @@ import AuthModule from './auth/auth.module';
 import { MedicalRecordModule } from './medical_record/medical_record.module';
 import UserModule from './user/user.module';
 import { TenantModule } from './tenant/tenant.module';
-import { RedisModule } from '@nestjs-modules/ioredis';
 import { getIdentityDataSource } from './db/data-source';
 import DatabaseModule from './database/database.module';
 import type { Request, Response } from 'express';
@@ -22,14 +21,6 @@ import type { Request, Response } from 'express';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
-    }),
-    RedisModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'single',
-        url: configService.get('REDIS_URL'),
-      }),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

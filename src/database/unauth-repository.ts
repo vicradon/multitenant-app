@@ -22,18 +22,35 @@ export class UnauthedDBConnectionService {
     if (!tenantId) throw new BadRequestException('Tenant id not provided');
 
     const tenantRepo = this.identityDataSource.getRepository(Tenant);
-    return tenantRepo.findOneOrFail({ where: { id: tenantId } });
+    return tenantRepo.findOne({ where: { id: tenantId } });
   }
 
-  async getRepositoryByTenant<T extends ObjectLiteral>(
-    tenant: Tenant,
+  getRepositoryFromCache<T extends ObjectLiteral>(
+    tenantId: string,
     entity: EntityTarget<T>,
-  ): Promise<Repository<T>> {
-    if (this.connectionMap.has(tenant.id)) {
+  ): Repository<T> | null {
+    if (this.connectionMap.has(tenantId)) {
       console.log('datasource obtained from cached');
-      const dataSource = this.connectionMap.get(tenant.id);
+      const dataSource = this.connectionMap.get(tenantId);
       return dataSource!.getRepository(entity);
     }
+
+    return null;
+  }
+
+  async getRepositoryFromTenantId<T extends ObjectLiteral>(
+    tenantId: string,
+    entity: EntityTarget<T>,
+  ): Promise<Repository<T>> {
+    const repository = this.getRepositoryFromCache(tenantId, entity);
+    if (repository) return repository;
+
+    /**
+     * IF TENANT HAS NOT BEEN INITIALIZED
+     */
+    const tenant = await this.getTenantById(tenantId);
+    if (!tenant)
+      throw new BadRequestException('Could not find user from token');
 
     // for cases where the data source has not been initialized
     const connString = tenant?.databaseConnectionString;
@@ -43,10 +60,10 @@ export class UnauthedDBConnectionService {
       );
 
     // initializing the datasource is what allows us to be dynamic
-    const dataSource = DynamicDataSource(connString)
+    const dataSource = DynamicDataSource(connString);
     await dataSource.initialize();
     console.log('datasource obtained from initialization');
-    
+
     this.connectionMap.set(tenant.id, dataSource);
     return dataSource.getRepository(entity);
   }
@@ -55,16 +72,16 @@ export class UnauthedDBConnectionService {
     domain: string,
     entity: EntityTarget<T>,
   ): Promise<Repository<T>> {
-    const tenant = await this.identityDataSource
+    const tenantRecord = await this.identityDataSource
       .getRepository(Tenant)
       .findOne({ where: { domain } });
 
-    if (!tenant)
+    if (!tenantRecord)
       throw new InternalServerErrorException(
-        'Could not establish connection with db',
+        'Could not establish connection with db: tenant not found',
       );
 
-    return this.getRepositoryByTenant(tenant, entity);
+    return this.getRepositoryFromTenantId(tenantRecord.id, entity);
   }
 
   getIdentityRepository(): Repository<Tenant> {

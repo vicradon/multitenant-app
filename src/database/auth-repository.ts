@@ -29,14 +29,9 @@ export class AuthedDBConnectionService {
   async getRepository<T extends ObjectLiteral>(entity: EntityTarget<T>) {
     const requestObject = this.context['req'] as Request;
     const currentUserContext = requestObject?.user as IUserContext;
-    const tenant = await this.unauthedRepoService.getTenantById(
-      currentUserContext.tenantId,
-    );
-    if (!tenant)
-      throw new BadRequestException('Could not find user from token');
 
-    const repo = await this.unauthedRepoService.getRepositoryByTenant(
-      tenant,
+    const repo = await this.unauthedRepoService.getRepositoryFromTenantId(
+      currentUserContext.tenantId,
       entity,
     );
 

@@ -14,7 +14,7 @@ export const getIdentityDataSource = (
   url: configService.get('DB_URL_IDENTITY'),
   entities: [Tenant],
   synchronize: true,
-  logging: false,
+  logging: true,
 });
 
 export const DynamicDataSource = (connectionString: string): DataSource => {
@@ -23,6 +23,7 @@ export const DynamicDataSource = (connectionString: string): DataSource => {
     url: connectionString,
     entities: sharedEntities,
     synchronize: true,
+    logging: false
   });
 };
 
